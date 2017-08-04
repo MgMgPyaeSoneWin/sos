@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Address;
 use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
@@ -50,12 +51,15 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:6',
             'fullname' => 'required|string|max:255',
             'nrc' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
+            'address_no' => 'required|string|max:255',
+            'address_street' => 'required|string|max:255',
+            'address_township' => 'required|string|max:255',
+            'address_city' => 'required|string|max:255',
             'gender' => 'required|string|max:255',
-            'phpno' => 'required|string|max:255',
+            'phno' => 'required|string|max:255',
             'role' => 'required|string|max:255',
         ]);
     }
@@ -68,10 +72,26 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => bcrypt($data['password']),
+        $address = Address::create([
+            'no' => $data['address_no'],
+            'street' => $data['address_street'],
+            'township' => $data['address_township'],
+            'city' => $data['address_city'],
         ]);
+
+        if (!empty($address))
+        {
+            return User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => bcrypt($data['password']),
+                'fullname' => $data['fullname'],
+                'nrc' => $data['nrc'],
+                'address_id' => $address->id,
+                'gender' => $data['gender'],
+                'phno' => $data['phno'],
+                'role' => $data['role'],
+            ]);
+        }
     }
 }
